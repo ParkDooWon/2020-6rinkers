@@ -37,25 +37,27 @@ public class CocktailController {
 	private final CocktailRecommendService cocktailRecommendService;
 
 	@GetMapping
-	public ResponseEntity<List<CocktailResponse>> findCocktails() {
+	public ResponseEntity<List<CocktailResponse>> findCocktails() throws InterruptedException {
 		return ResponseEntity.ok(cocktailService.findAllCocktails());
 	}
 
 	@GetMapping("/contain-word")
 	public ResponseEntity<List<CocktailResponse>> findPageContainingWord(
-		@RequestParam(defaultValue = "") String contain, @RequestParam long id, @RequestParam int size) {
+		@RequestParam(defaultValue = "") String contain, @RequestParam long id, @RequestParam int size) throws
+		InterruptedException {
 		List<CocktailResponse> cocktailResponses = cocktailService.findPageContainingWord(contain, id, size);
 		return ResponseEntity.ok(cocktailResponses);
 	}
 
 	@GetMapping("/contain-tags")
 	public ResponseEntity<List<CocktailResponse>> findPageFilteredByTags(
-		@RequestParam(defaultValue = "") List<Long> tagIds, @RequestParam long id, @RequestParam int size) {
+		@RequestParam(defaultValue = "") List<Long> tagIds, @RequestParam long id, @RequestParam int size) throws
+		InterruptedException {
 		return ResponseEntity.ok(cocktailService.findPageFilteredByTags(tagIds, id, size));
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<CocktailDetailResponse> findCocktail(@PathVariable Long id) {
+	public ResponseEntity<CocktailDetailResponse> findCocktail(@PathVariable Long id) throws InterruptedException {
 		return ResponseEntity.ok(cocktailService.findCocktail(id));
 	}
 

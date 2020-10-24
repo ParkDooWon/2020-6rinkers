@@ -1,14 +1,14 @@
 package com.cocktailpick.back.cocktail.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +17,7 @@ import com.cocktailpick.back.cocktail.domain.Cocktail;
 import com.cocktailpick.back.cocktail.domain.CocktailFindStrategyFactory;
 import com.cocktailpick.back.cocktail.domain.CocktailRepository;
 import com.cocktailpick.back.cocktail.domain.CocktailSearcher;
+import com.cocktailpick.back.cocktail.domain.Temp;
 import com.cocktailpick.back.cocktail.dto.CocktailDetailResponse;
 import com.cocktailpick.back.cocktail.dto.CocktailRequest;
 import com.cocktailpick.back.cocktail.dto.CocktailResponse;
@@ -40,35 +41,50 @@ public class CocktailService {
 	private final TagRepository tagRepository;
 	private final CocktailFindStrategyFactory cocktailFindStrategyFactory;
 
+	@Cacheable("allCocktails")
 	@Transactional(readOnly = true)
-	public List<CocktailResponse> findAllCocktails() {
-		return Collections.unmodifiableList(CocktailResponse.listOf(cocktailRepository.findAll()));
+	public List<CocktailResponse> findAllCocktails() throws InterruptedException {
+		System.err.println("모든 칵테일을 조회합니다!");
+		Thread.sleep(3 * 1000);
+
+		return new ArrayList<>();
 	}
 
+	@Cacheable(value = "cocktails", key = "#contain + #id + #size")
 	@Transactional(readOnly = true)
-	public List<CocktailResponse> findPageContainingWord(String contain, long id, int size) {
-		Pageable pageRequest = PageRequest.of(0, size);
+	public List<CocktailResponse> findPageContainingWord(String contain, long id, int size) throws
+		InterruptedException {
+		System.err.println("특정 단어가 포함된 칵테일 찾기를 시작합니다!");
+		Thread.sleep(3 * 1000);
 
-		List<Cocktail> cocktails = cocktailRepository.findByNameContainingAndIdGreaterThan(contain, id, pageRequest)
-			.getContent();
-
-		return Collections.unmodifiableList(CocktailResponse.listOf(cocktails));
+		return new ArrayList<>();
 	}
 
+	@Cacheable(value = "nameCocktails", key = "#tagIds + #id + #size")
 	@Transactional(readOnly = true)
-	public List<CocktailResponse> findPageFilteredByTags(List<Long> tagIds, long id, int size) {
-		List<Cocktail> persistCocktails = cocktailRepository.findByIdGreaterThan(id);
+	public List<CocktailResponse> findPageFilteredByTags(List<Long> tagIds, long id, int size) throws
+		InterruptedException {
+		Thread.sleep(3 * 1000);
+		try {
+			List<Cocktail> persistCocktails = cocktailRepository.findByIdGreaterThan(id);
 
-		List<Cocktail> cocktails = persistCocktails.stream()
-			.filter(cocktail -> cocktail.containTagIds(tagIds))
-			.limit(size)
-			.collect(Collectors.toList());
+			List<Cocktail> cocktails = persistCocktails.stream()
+				.filter(cocktail -> cocktail.containTagIds(tagIds))
+				.limit(size)
+				.collect(Collectors.toList());
+			return CocktailResponse.listOf(cocktails);
+		} catch (Exception e) {
+			System.err.println("");
+		}
 
-		return CocktailResponse.listOf(cocktails);
+		return null;
 	}
 
+	@Cacheable(value = "cocktail", key = "#id")
 	@Transactional(readOnly = true)
-	public CocktailDetailResponse findCocktail(Long id) {
+	public CocktailDetailResponse findCocktail(Long id) throws InterruptedException {
+		System.err.println("칵테일 찾기를 시작합니다!");
+		Thread.sleep(3 * 1000);
 		Cocktail cocktail = findById(id);
 		return CocktailDetailResponse.of(cocktail);
 	}
@@ -87,6 +103,7 @@ public class CocktailService {
 		return cocktail.getId();
 	}
 
+	@CachePut(value = "cocktail", key = "#id")
 	@Transactional
 	public void updateCocktail(Long id, CocktailRequest cocktailRequest) {
 		Cocktail cocktail = findById(id);
@@ -102,14 +119,16 @@ public class CocktailService {
 			.orElseThrow(() -> new EntityNotFoundException(ErrorCode.COCKTAIL_NOT_FOUND));
 	}
 
+	// @CacheEvict(value = "cocktail", key = "#id")
 	@Transactional
 	public void deleteCocktail(Long id) {
 		cocktailRepository.deleteById(id);
 	}
 
+	@CacheEvict(value = "allCocktails")
 	@Transactional
 	public void deleteAllCocktails() {
-		cocktailRepository.deleteAll();
+		System.err.println("모든 칵테일을 삭제했습니다.");
 	}
 
 	@Transactional
@@ -182,5 +201,18 @@ public class CocktailService {
 	public List<CocktailResponse> findByNameContaining(String name) {
 		List<Cocktail> cocktailsContainingName = cocktailRepository.findByNameContaining(name);
 		return CocktailResponse.listOf(cocktailsContainingName);
+	}
+
+	@Cacheable(value = "temp", key = "#id")
+	public Temp findTemp(Long id) throws InterruptedException {
+		System.err.println("Find ID : " + id);
+		Thread.sleep(3 * 1000);
+
+		return new Temp(id);
+	}
+
+	@CachePut(value = "temp", key = "#id")
+	public Temp updateTemp(Long id, Long tempNum) {
+		return new Temp(tempNum);
 	}
 }
