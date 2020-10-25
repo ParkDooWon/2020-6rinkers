@@ -16,7 +16,6 @@ import com.cocktailpick.back.cocktail.dto.CocktailResponse;
 import com.cocktailpick.back.cocktail.dto.RecommendRequest;
 import com.cocktailpick.back.tag.domain.TagType;
 import com.cocktailpick.back.user.dto.AuthResponse;
-
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.MultiPartSpecification;
@@ -212,5 +211,10 @@ public class CocktailAcceptanceStep {
 			() -> assertThat(cocktailResponses).hasSize(2),
 			() -> assertThat(cocktailResponses).extracting("name").contains("갓마더", "그래스호퍼")
 		);
+	}
+
+	public static void assertThatFirstAttemptTakeLongerThanNextAttempt(ExtractableResponse<Response> firstAttempt,
+		ExtractableResponse<Response> nextAttempt) {
+		assertThat(firstAttempt.time()).isGreaterThan(nextAttempt.time());
 	}
 }

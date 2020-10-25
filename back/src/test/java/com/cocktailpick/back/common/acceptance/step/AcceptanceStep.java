@@ -20,9 +20,4 @@ public class AcceptanceStep {
 	public static void assertThatStatusIsNoContent(ExtractableResponse<Response> response) {
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
 	}
-
-	public static void assertThatFirstAttemptTakeLongerThanNextAttempt(ExtractableResponse<Response> firstAttempt,
-		ExtractableResponse<Response> nextAttempt) {
-		assertThat(firstAttempt.time()).isGreaterThan(nextAttempt.time());
-	}
 }
