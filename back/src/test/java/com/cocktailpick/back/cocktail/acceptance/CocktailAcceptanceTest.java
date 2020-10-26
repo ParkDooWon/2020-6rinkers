@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 
 import com.cocktailpick.back.cocktail.dto.AbvAnswer;
@@ -29,6 +31,8 @@ import io.restassured.specification.MultiPartSpecification;
 
 @DisplayName("Cocktail 인수/통합 테스트")
 class CocktailAcceptanceTest extends AcceptanceTest {
+	@Autowired
+	private CacheManager cacheManager;
 
 	@DisplayName("모든 칵테일을 조회한다.")
 	@Test
@@ -230,6 +234,29 @@ class CocktailAcceptanceTest extends AcceptanceTest {
 
 		// then
 		assertThatStatusIsOk(response);
+	}
+
+	@DisplayName("칵테일 수정시, 이전에 캐싱된 칵테일 데이터를 수정된 칵테일 데이터로 변경하여 캐싱한다.")
+	@Test
+	void checkUpdatedCocktailCached() {
+		// given
+		AuthResponse authResponse = requestAdminAuth();
+
+		TagRequest sweetTag = new TagRequest("단맛", TagType.FLAVOR.getTagType());
+		TagRequest sourTag = new TagRequest("신맛", TagType.FLAVOR.getTagType());
+
+		requestToAddTag(sweetTag, authResponse);
+		requestToAddTag(sourTag, authResponse);
+
+		String createdLocation = requestToAddCocktailAndGetLocation(KAHLUA_MILK_REQUEST, authResponse);
+
+		// when
+		requestToFindCocktail(createdLocation);
+		assertThatCachingCorrectData(KAHLUA_MILK_REQUEST, cacheManager);
+		requestToUpdateCocktail(createdLocation, MALIBU_ORANGE, authResponse);
+
+		// then
+		assertThatCachingCorrectData(MALIBU_ORANGE, cacheManager);
 	}
 
 	@DisplayName("칵테일을 삭제한다.")

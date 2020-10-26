@@ -68,7 +68,7 @@ public class Cocktail extends BaseTimeEntity {
 		this.flavor = flavor;
 	}
 
-	public void update(Cocktail requestCocktail, List<Tag> tags, List<RecipeItem> recipeItems) {
+	public Cocktail update(Cocktail requestCocktail, List<Tag> tags, List<RecipeItem> recipeItems) {
 		updateCocktailTags(tags);
 		updateRecipe(recipeItems);
 
@@ -78,6 +78,8 @@ public class Cocktail extends BaseTimeEntity {
 		this.origin = requestCocktail.origin;
 		this.flavor = requestCocktail.flavor;
 		this.imageUrl = requestCocktail.imageUrl;
+
+		return this;
 	}
 
 	private void updateCocktailTags(List<Tag> tags) {

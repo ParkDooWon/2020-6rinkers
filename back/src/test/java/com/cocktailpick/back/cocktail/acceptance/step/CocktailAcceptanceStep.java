@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpHeaders.*;
 
 import java.util.List;
+import java.util.Objects;
 
+import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 
 import com.cocktailpick.back.cocktail.dto.CocktailDetailResponse;
@@ -216,5 +218,13 @@ public class CocktailAcceptanceStep {
 	public static void assertThatFirstAttemptTakeLongerThanNextAttempt(ExtractableResponse<Response> firstAttempt,
 		ExtractableResponse<Response> nextAttempt) {
 		assertThat(firstAttempt.time()).isGreaterThan(nextAttempt.time());
+	}
+
+	public static void assertThatCachingCorrectData(CocktailRequest request, CacheManager cacheManager) {
+		CocktailDetailResponse cachedData = Objects.requireNonNull(cacheManager.getCache("cocktail"))
+			.get(1L, CocktailDetailResponse.class);
+
+		assert cachedData != null;
+		assertThat(request.getName()).isEqualTo(cachedData.getName());
 	}
 }
