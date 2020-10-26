@@ -227,4 +227,8 @@ public class CocktailAcceptanceStep {
 		assert cachedData != null;
 		assertThat(request.getName()).isEqualTo(cachedData.getName());
 	}
+
+	public static void assertThatCachedCocktailIsNull(CacheManager cacheManager) {
+		assertThat(cacheManager.getCache("cocktail").get(1L, CocktailDetailResponse.class)).isNull();
+	}
 }

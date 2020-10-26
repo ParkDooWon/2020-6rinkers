@@ -278,6 +278,27 @@ class CocktailAcceptanceTest extends AcceptanceTest {
 		assertThatStatusIsNoContent(response);
 	}
 
+	@DisplayName("칵테일 삭제 시, 캐싱된 칵테일을 삭제한다.")
+	@Test
+	void checkCachedCocktailRemoved() {
+		// given
+		AuthResponse authResponse = requestAdminAuth();
+
+		TagRequest sweetTag = new TagRequest("단맛", TagType.FLAVOR.getTagType());
+
+		requestToAddTag(sweetTag, authResponse);
+
+		String createdLocation = requestToAddCocktailAndGetLocation(KAHLUA_MILK_REQUEST, authResponse);
+
+		// when
+		requestToFindCocktail(createdLocation);
+		assertThatCachingCorrectData(KAHLUA_MILK_REQUEST, cacheManager);
+		requestToDeleteCocktail(createdLocation, authResponse);
+
+		// then
+		assertThatCachedCocktailIsNull(cacheManager);
+	}
+
 	@DisplayName("모든 칵테일을 삭제한다.")
 	@Test
 	void deleteAllCocktails() {
