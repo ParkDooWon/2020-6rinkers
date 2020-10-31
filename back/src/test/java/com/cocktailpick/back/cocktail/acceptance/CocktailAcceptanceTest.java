@@ -13,8 +13,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 
 import com.cocktailpick.back.cocktail.dto.AbvAnswer;
@@ -31,9 +29,6 @@ import io.restassured.specification.MultiPartSpecification;
 
 @DisplayName("Cocktail 인수/통합 테스트")
 class CocktailAcceptanceTest extends AcceptanceTest {
-	@Autowired
-	private CacheManager cacheManager;
-
 	@DisplayName("모든 칵테일을 조회한다.")
 	@Test
 	void findCocktails() {
